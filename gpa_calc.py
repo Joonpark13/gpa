@@ -7,14 +7,17 @@ class Course:
 
     def __init__(self, title, term, subject, catalog_num, unit, grade):
         self.title = title
+        self.term = term
         self.subject = subject
         self.catalog_num = catalog_num
         self.unit = unit
         self.grade = grade
 
+    def __repr__(self):
+        return (self.subject + " " + self.catalog_num + " " + self.title +
+                " \nUnits: " + str(self.unit) + " Grade point: " +
+                str(self.grade) + "\n")
 
-# A complete list of all courses from transcript
-courselist = []
 
 """ Parses the courses taken in a term
 
@@ -27,9 +30,24 @@ courselist = []
 :return: a list of course objects for this term
 """
 def parse_term(term_id, term_name, term_data):
+    courses = []
+    # Get all subjects in that term
+    subjects = client.subjects(term = term_id)
     # Parse text transcript file
-    #       If line starts with subject, parse line, create Course object
-    pass
+    for line in term_data:
+        # If line starts with subject, parse line, create Course object
+        if len(line.split()) > 0 and line.split()[0] in [x["symbol"] for x in subjects]:
+            title = line[20:54].rstrip()
+            subject = line.split()[0]
+            catalog_num = line[10:20].rstrip()
+            try:
+                unit = float(line[54:58])
+                grade = float(line[77:82])
+                course = Course(title, term_name, subject, catalog_num, unit, grade)
+                courses.append(course)
+            except ValueError:
+                pass
+    return courses
 
 def cum_gpa():
     # Calculate and return cumulative gpa
@@ -37,6 +55,9 @@ def cum_gpa():
 
 # Interactive GAP calculation
 def main():
+    # A complete list of all courses from transcript
+    courselist = []
+
     # Get all terms
     terms = [{"name":x['name'], "id":x["id"]} for x in client.terms()]
     # If beginning of line matches a term, parse all lines following that term
@@ -52,7 +73,7 @@ def main():
             # If a term line has been found, parse the current list, then reset
             # the list
             if stripped_line in [x["name"] for x in terms]:
-                parse_term(x["id"], stripped_line, term_lines)
+                courselist += parse_term(x["id"], stripped_line, term_lines)
                 term_lines = []
             else:
                 term_lines.append(line)
