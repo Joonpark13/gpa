@@ -49,9 +49,15 @@ def parse_term(term_id, term_name, term_data):
                 pass
     return courses
 
-def cum_gpa():
+def cum_gpa(courselist):
     # Calculate and return cumulative gpa
-    pass
+    total_units = 0.0
+    total_grade_points = 0.0
+    for course in courselist:
+        total_units += course.unit
+        total_grade_points += course.grade
+    return total_grade_points / total_units
+
 
 # Interactive GAP calculation
 def main():
@@ -79,6 +85,20 @@ def main():
                 term_lines.append(line)
 
     # User interaction
+    print "Cumulative GPA: {0:.3f}".format(cum_gpa(courselist))
+    print ("Enter y (or just hit enter) to include the course in your"
+           "calculation. Enter n to exclude it.")
+    total_units = 0.0
+    total_grade_points = 0.0
+    for course in courselist:
+        response = raw_input(course)
+        if response == "" or response == "y" or response == "Y":
+            total_units += course.unit
+            total_grade_points += course.grade
+        elif response == "n" or response == "N":
+            pass
+    print "GPA for Selected Courses: {0:.3f}".format(total_grade_points /
+                                                     total_units)
 
 if __name__ == "__main__":
     main()
