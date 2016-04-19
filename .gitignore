@@ -1,1 +1,3 @@
 transcript.txt
+transcript*.txt
+*.pyc
